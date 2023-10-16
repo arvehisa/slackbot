@@ -1,7 +1,11 @@
 from slack_bolt import App
+import os
+
+SLACK_BOT_TOKEN = os.environ['SLACK_BOT_TOKEN']
+SLACK_SIGNING_SECRET = os.environ['SLACK_SIGNING_SECRET']
 
 # Boltアプリの初期化
-app = App(token="xoxb-827550038838-6030096452375-CZdfMVbnP5X6kVUHcYKDq9c1", signing_secret="0693df7ac78bab8738a635e936225b03")
+app = App(token="SLACK_BOT_TOKEN", signing_secret="SLACK_SIGNING_SECRET")
 
 # app_mention イベントのリッスン
 @app.event("app_mention")
