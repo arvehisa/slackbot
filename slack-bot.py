@@ -10,9 +10,16 @@ app = App(token=SLACK_BOT_TOKEN, signing_secret=SLACK_SIGNING_SECRET)
 # app_mention イベントのリッスン
 @app.event("app_mention")
 def mention(event, say):
-    # メンションされた際の反応
-    say("こんにちは")
+    # メンション時のメッセージテキストを取得
+    received_text = event['text']
+    
+    # 受け取ったテキストを加工して返信
+    response = f"入力テキスト: {received_text}"
+    say(response)
 
 # サーバーの起動
 if __name__ == "__main__":
     app.start(port=3000)
+
+
+
