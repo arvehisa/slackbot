@@ -1,2 +1,4 @@
 slack-bolt
 Flask
+openai
+langchain
