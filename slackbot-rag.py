@@ -9,16 +9,22 @@ from langchain.chat_models import ChatOpenAI
 from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import ConversationalRetrievalChain
 
-
 model_id = os.environ['MODEL_ID']
-"""
 llm = Bedrock(model_id=model_id,)
-"""
-llm = ChatOpenAI(model_name=model_id)
+#llm = ChatOpenAI(model_name=model_id)
 
 kendra_index_id=os.environ['KENDRA_INDEX_ID']
 region=os.environ['AWS_REGION']
-retriever = AmazonKendraRetriever(index_id=kendra_index_id, region_name=region, verbose=True)
+retriever = AmazonKendraRetriever(
+        index_id=kendra_index_id,
+        region_name=region,
+        attribute_filter={
+            "EqualsTo": {
+                "Key": "_language_code",
+                "Value": {"StringValue": "ja"}
+            }
+        },
+        verbose=True)
 
 qa_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=retriever, verbose=True)
 
@@ -26,6 +32,7 @@ qa_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=retriever, v
 SLACK_BOT_TOKEN = os.environ['SLACK_BOT_TOKEN']
 SOCKET_MODE_TOKEN = os.environ['SOCKET_MODE_TOKEN']
 app = App(token=SLACK_BOT_TOKEN)
+
 
 @app.event("app_mention")
 def mention(event, say):
