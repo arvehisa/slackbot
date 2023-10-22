@@ -13,8 +13,6 @@ from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
-#from langchain.chains import ConversationalRetrievalChain
-
 model_id = os.environ['MODEL_ID']
 llm = Bedrock(model_id=model_id)  #anthropic.claude-v2
 # llm = ChatOpenAI(model_name=model_id) #gpt-4
@@ -26,7 +24,7 @@ with open('docs.pkl', 'rb') as f:
 
 region=os.environ['AWS_REGION']
 
-vectorstore_faiss = FAISS.load_local("faiss_index", embeddings) #ここ本当に合ってるかわからない
+vectorstore_faiss = FAISS.load_local("faiss_index", embeddings) 
 retriever = VectorStoreIndexWrapper(vectorstore=vectorstore_faiss)
 
 prompt_template = """
@@ -78,7 +76,7 @@ def mention(event, say):
     
     say(text=response, thread_ts=thread_ts)
 
-# サーバーの起動
+
 if __name__ == "__main__":
     handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
     handler.start()
