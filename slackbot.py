@@ -15,9 +15,7 @@ app = App(token=SLACK_BOT_TOKEN)
 
 # llm
 model_id = "anthropic.claude-v2"
-llm = Bedrock(
-    model_id=model_id,
-)
+llm = Bedrock(model_id=model_id)
 #llm = OpenAI()
 
 @app.event("app_mention")
