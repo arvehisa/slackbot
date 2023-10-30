@@ -8,6 +8,7 @@ from langchain.llms import Bedrock
 from langchain.chat_models import ChatOpenAI
 from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import ConversationalRetrievalChain
+from langchain.prompts import PromptTemplate
 
 model_id = os.environ['MODEL_ID']
 llm = Bedrock(model_id=model_id,)
@@ -18,12 +19,12 @@ region=os.environ['AWS_REGION']
 retriever = AmazonKendraRetriever(
         index_id=kendra_index_id,
         region_name=region,
-        attribute_filter={
-            "EqualsTo": {
-                "Key": "_language_code",
-                "Value": {"StringValue": "ja"}
-            }
-        },
+#        attribute_filter={
+#            "EqualsTo": {
+#                "Key": "_language_code",
+#                "Value": {"StringValue": "ja"}
+#            }
+#        },
         verbose=True)
 
 qa_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=retriever, verbose=True)

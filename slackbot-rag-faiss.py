@@ -5,7 +5,7 @@ import pickle
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-from langchain.llms import Bedrock
+from langchain.chat_models import BedrockChat
 from langchain.embeddings import BedrockEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.vectorstores import FAISS
@@ -14,8 +14,8 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
 model_id = os.environ['MODEL_ID']
-llm = Bedrock(model_id=model_id)  #anthropic.claude-v2
-# llm = ChatOpenAI(model_name=model_id) #gpt-4
+llm = BedrockChat(model_id=model_id)  #anthropic.claude-v2
+# llm = ChatOpenAI(m odel_name=model_id) #gpt-4
 embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1")
 
 # load text chunks
