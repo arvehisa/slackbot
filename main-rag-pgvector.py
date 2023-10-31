@@ -1,6 +1,5 @@
 import os
 import re
-import pickle
 
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -8,7 +7,6 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from langchain.chat_models import BedrockChat
 from langchain.embeddings import BedrockEmbeddings
 from langchain.chat_models import ChatOpenAI
-from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.pgvector import PGVector
