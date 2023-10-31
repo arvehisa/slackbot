@@ -11,8 +11,8 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.pgvector import PGVector
 
-region=os.environ['AWS_REGION']
-model_id = os.environ['MODEL_ID']
+region="us-east-1"
+model_id ="anthropic.claude-v2"
 llm = BedrockChat(model_id=model_id)  #anthropic.claude-v2
 # llm = ChatOpenAI(m odel_name=model_id) #gpt-4
 embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1")
