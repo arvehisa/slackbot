@@ -80,7 +80,7 @@ def mention(event, say):
     
     say(text=response, thread_ts=thread_ts)
 
-## Socket mode
+# socket mode の場合
 # if __name__ == "__main__":
 #     handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
 #     handler.start()
