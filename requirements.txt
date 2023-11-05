@@ -4,3 +4,4 @@ openai
 langchain
 boto3
 psycopg2-binary
+pgvector
