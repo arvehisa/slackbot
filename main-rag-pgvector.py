@@ -60,6 +60,7 @@ qa = RetrievalQA.from_chain_type(
 # Slackbot
 SLACK_BOT_TOKEN = os.environ['SLACK_BOT_TOKEN']
 SOCKET_MODE_TOKEN = os.environ['SOCKET_MODE_TOKEN']
+SLACK_SIGNING_SECRET = os.environ['SLACK_SIGNING_SECRET']
 app = App(token=SLACK_BOT_TOKEN)
 
 @app.event("app_mention")
