@@ -8,8 +8,11 @@ import { MainStack } from '../lib/main-stack';
 import { ECRStack } from "../lib/ecr-stack";
 
 const app = new App();
-new MainStack(app, 'MainStack', {});
-new ECRStack(app, 'ECRStack', {});
+
+const resourceName = "slackbot";
 
 Tags.of(app).add('created', 'cdk');
-Tags.of(app).add('repository', 'cdk');
+Tags.of(app).add('repository', resourceName);
+
+new MainStack(app, 'MainStack', { resourceName });
+new ECRStack(app, 'ECRStack', { resourceName });
