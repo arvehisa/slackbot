@@ -2,8 +2,7 @@
 import 'source-map-support/register';
 import {
   App, Tags
-}
-  from 'aws-cdk-lib';
+} from 'aws-cdk-lib';
 import { MainStack } from '../lib/main-stack';
 import { ECRStack } from "../lib/ecr-stack";
 
