@@ -11,10 +11,11 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.pgvector import PGVector
 
-region="us-east-1"
+# これ意味ない気がした
+# region="us-east-1"
 model_id ="anthropic.claude-v2"
 llm = BedrockChat(model_id=model_id)  #anthropic.claude-v2
-# llm = ChatOpenAI(m odel_name=model_id) #gpt-4
+# llm = ChatOpenAI(model_name=model_id) #gpt-4
 embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1")
 
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
@@ -82,9 +83,9 @@ def mention(event, say):
     say(text=response, thread_ts=thread_ts)
 
 # socket mode の場合
-# if __name__ == "__main__":
-#     handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
-#     handler.start()
-
 if __name__ == "__main__":
-    app.start(port=8080)
+    handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
+    handler.start()
+
+# if __name__ == "__main__":
+#     app.start(port=8080)
