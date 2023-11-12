@@ -9,6 +9,7 @@ import { Construct } from 'constructs';
 type Props = cdk.StackProps & {
   ecr: ecr.Repository;
   vpc: ec2.Vpc;
+  appRunnerVpcConnectorSG: ec2.SecurityGroup;
 };
 
 export class AppRunnerStack extends cdk.Stack {
@@ -17,7 +18,8 @@ export class AppRunnerStack extends cdk.Stack {
     
     const vpcConnector = new apprunner.VpcConnector(this, 'VpcConnector', {
       vpc: props.vpc,
-      vpcSubnets: props.vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }),
+      securityGroups: [props.appRunnerVpcConnectorSG],
+      vpcSubnets: props.vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
       vpcConnectorName: 'apprunner-vpc-connector',
     });
         

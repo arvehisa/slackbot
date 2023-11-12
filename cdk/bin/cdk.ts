@@ -14,4 +14,5 @@ const vpcRdsStack = new VpcRdsStack(app, 'VpcRdsStack');
 new AppRunnerStack(app, 'AppRunnerStack', {
   ecr: ecrStack.ecr,
   vpc: vpcRdsStack.myVpc, 
+  appRunnerVpcConnectorSG: vpcRdsStack.appRunnerVpcConnectorSG,
 });

@@ -5,6 +5,7 @@ import { Construct } from 'constructs';
 
 export class VpcRdsStack extends cdk.Stack {
   readonly myVpc: ec2.Vpc;
+  readonly appRunnerVpcConnectorSG: ec2.SecurityGroup;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -58,10 +59,12 @@ export class VpcRdsStack extends cdk.Stack {
             ),
             vpc,
             securityGroups: [PostgresSG],
-            vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }),
+            vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
+            publiclyAccessible: true,
         }
     });
     this.myVpc = vpc
+    this.appRunnerVpcConnectorSG = AppRunnerVpcConnectorSG
 
   }
 }
