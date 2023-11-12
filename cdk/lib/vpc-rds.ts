@@ -59,7 +59,8 @@ export class VpcRdsStack extends cdk.Stack {
             ),
             vpc,
             securityGroups: [PostgresSG],
-            vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
+            //vpcSubnets 正しくは PRIVATE_EGRESS だが、ローカルテストと前準備の都合上 Public にする
+            vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC }), 
             publiclyAccessible: true,
         }
     });
