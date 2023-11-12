@@ -11,10 +11,9 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.pgvector import PGVector
 
-# これ意味ない気がした
-# region="us-east-1"
+region="us-east-1"
 model_id ="anthropic.claude-v2"
-llm = BedrockChat(model_id=model_id)  #anthropic.claude-v2
+llm = BedrockChat(model_id=model_id, region_name=region)  #anthropic.claude-v2
 # llm = ChatOpenAI(model_name=model_id) #gpt-4
 embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1")
 
@@ -88,4 +87,4 @@ if __name__ == "__main__":
     handler.start()
 
 # if __name__ == "__main__":
-#     app.start(port=8080)
+#     app.start(port=8080)d

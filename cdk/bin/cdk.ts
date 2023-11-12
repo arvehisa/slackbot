@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CdkStack } from '../lib/cdk-stack';
-import { EcrStack } from '../lib/ecr-stack';
+import { AppRunnerStack } from '../lib/apprunner'; 
+import { VpcRdsStack } from '../lib/vpc-rds';
+import { EcrStack } from '../lib/ecr';
 
 const app = new cdk.App();
 
-const ecrStack = new EcrStack(app, 'EcrStack', {});
+const ecrStack = new EcrStack(app, 'EcrStack'); 
 
-new CdkStack(app, 'CdkStack', {ecr: ecrStack.ecr});
+const vpcRdsStack = new VpcRdsStack(app, 'VpcRdsStack'); 
+
+new AppRunnerStack(app, 'AppRunnerStack', {
+  ecr: ecrStack.ecr,
+  vpc: vpcRdsStack.myVpc, 
+});
