@@ -3,6 +3,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as apprunner from '@aws-cdk/aws-apprunner-alpha';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 type Props = cdk.StackProps & {
@@ -36,11 +37,34 @@ export class AppRunnerStack extends cdk.Stack {
     instanceRole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')
     )
-      
+
+    const secrets = secretsmanager.Secret.fromSecretNameV2(
+      scope,
+      'rag-pgvector-db-secrets', //CDK用の名前
+      'rag-pgvector-db-secrets' //実際のSecretsの名前
+    )
+
+    //手動で Slackbot の Secret を Secrets Manager にいれたものをここで取得する
+    const slackSecret = secretsmanager.Secret.fromSecretAttributes( 
+      this,
+      'SlackSecret',
+      {
+        secretCompleteArn: 'arn:aws:secretsmanager:us-east-1:618044871166:secret:slackbot-credentials-DdeZ1X',
+      }
+    );
+
     new apprunner.Service(this, 'AppRunnerService', {
       serviceName: 'slackbot-rag-pgvector',
       source: apprunner.Source.fromEcr({
-        imageConfiguration: { port: 8080 },
+        imageConfiguration: { 
+          port: 8080,
+          environment: {
+            PGVECTOR_HOST: 'rag-pgvector-db.cluster-cqk2c3y2xg3l.ap-northeast-1.rds.amazonaws.com',
+            PGVECTOR_PASSWORD: secrets.secretValueFromJson('password').toString(),
+            SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').toString(),
+            SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').toString(),
+          }
+        },
         repository: props.ecr,
         tag: 'latest',
       }),

@@ -40,12 +40,13 @@ export class VpcRdsStack extends cdk.Stack {
     
     const rdsCredentials = rds.Credentials.fromGeneratedSecret(
         'postgres', //db username
-        { secretName: 'slackbot-rag-pgvector-db-secrets' }
+        { secretName: 'rag-pgvector-db-secrets' }
     )
 
     new rds.DatabaseCluster(this, 'postgres', {
         credentials: rdsCredentials,
-        defaultDatabaseName: 'slackbotRagPgvector',
+        defaultDatabaseName: 'postgres', //database name
+        clusterIdentifier: 'rag-pgvector-db',
         engine: rds.DatabaseClusterEngine.auroraPostgres({
             version: rds.AuroraPostgresEngineVersion.VER_15_3,
           }),
