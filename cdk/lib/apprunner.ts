@@ -39,7 +39,7 @@ export class AppRunnerStack extends cdk.Stack {
     )
 
     const secrets = secretsmanager.Secret.fromSecretNameV2(
-      scope,
+      this,
       'rag-pgvector-db-secrets', //CDK用の名前
       'rag-pgvector-db-secrets' //実際のSecretsの名前
     )
@@ -59,10 +59,11 @@ export class AppRunnerStack extends cdk.Stack {
         imageConfiguration: { 
           port: 8080,
           environment: {
-            PGVECTOR_HOST: 'rag-pgvector-db.cluster-cqk2c3y2xg3l.ap-northeast-1.rds.amazonaws.com',
-            PGVECTOR_PASSWORD: secrets.secretValueFromJson('password').toString(),
-            SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').toString(),
-            SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').toString(),
+            // unsafeUnwrap() は、SecretValue から値を取り出すメソッド。Secret は Cloudformation に出力されるらしいのでセキュリティリスクあり
+            PGVECTOR_HOST: secrets.secretValueFromJson('host').unsafeUnwrap(),
+            PGVECTOR_PASSWORD: secrets.secretValueFromJson('password').unsafeUnwrap(),
+            SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').unsafeUnwrap(),
+            SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').unsafeUnwrap(),
           }
         },
         repository: props.ecr,
