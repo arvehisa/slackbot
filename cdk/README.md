@@ -1,14 +1,11 @@
-# Welcome to your CDK TypeScript project
+* `cdk deploy EcrStack`
+-> push container to ecr
 
-This is a blank project for CDK development with TypeScript.
+* `cdk deploy NetworkStack`
+* `cdk deploy RdsStack`
+-> ローカルで接続できるようにRDS Security Group に Inbound MyIP をいれる
+-> DB 接続して、`CREATE EXTENSION vector;` で pgvector を作る
+-> data/dataprep-pgvector.py でデータの前処理。テーブルを作ってベクトルデータを入れる
+-> Secrets Manager に手動で Slack Token いれる
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+* `cdk deploy AppRunnerStack --no-rollback`
