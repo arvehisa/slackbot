@@ -59,7 +59,7 @@ qa = RetrievalQA.from_chain_type(
 
 # Slackbot
 SLACK_BOT_TOKEN = os.environ['SLACK_BOT_TOKEN']
-SOCKET_MODE_TOKEN = os.environ['SOCKET_MODE_TOKEN']
+# SOCKET_MODE_TOKEN = os.environ['SOCKET_MODE_TOKEN']
 SLACK_SIGNING_SECRET = os.environ['SLACK_SIGNING_SECRET']
 app = App(token=SLACK_BOT_TOKEN)
 
@@ -82,9 +82,9 @@ def mention(event, say):
     say(text=response, thread_ts=thread_ts)
 
 # socket mode の場合
-if __name__ == "__main__":
-    handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
-    handler.start()
-
 # if __name__ == "__main__":
-#     app.start(port=8080)d
+#     handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
+#     handler.start()
+
+if __name__ == "__main__":
+    app.start(port=8080)
