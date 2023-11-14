@@ -82,9 +82,9 @@ def mention(event, say):
     say(text=response, thread_ts=thread_ts)
 
 # socket mode の場合
-if __name__ == "__main__":
-    handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
-    handler.start()
-
 # if __name__ == "__main__":
-#     app.start(port=8080)
+#     handler = SocketModeHandler(app, SOCKET_MODE_TOKEN)
+#     handler.start()
+
+if __name__ == "__main__":
+    app.start(port=8080)
