@@ -15,7 +15,7 @@ region="us-east-1"
 model_id ="anthropic.claude-v2" #anthropic.claude-v2
 llm = BedrockChat(model_id=model_id, region_name=region)  
 # llm = ChatOpenAI(model_name=model_id) #gpt-4
-embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1")
+embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1", region_name=region)
 
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
     driver="psycopg2",
