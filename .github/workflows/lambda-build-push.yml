@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'lambda/**'
-      - '.github/workflows/**'
+      - '.github/workflows/lambda-build-push.yml'
 
 env:
     AWS_REGION: ap-northeast-1
