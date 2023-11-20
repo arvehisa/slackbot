@@ -13,7 +13,7 @@ import time
 # Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(message)s')
 
 # set up stdout logging
 handler = logging.StreamHandler(sys.stdout)
@@ -101,7 +101,7 @@ def lambda_handler(event, context):
 #                     "name": "slackbot-rag-documents-20231119"
 #                 },
 #                 "object": {
-#                     "key": "clean-rooms-api-reference.pdf"
+#                     "key": "New_and_improved_embedding_model.pdf"
 #                 }
 #             }
 #         }
