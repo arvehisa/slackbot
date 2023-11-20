@@ -14,7 +14,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 docs = text_splitter.split_documents(documents)
 
-bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1")
+bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1", region_name="us-east-1")
 
 # connect to pgvector & embedding and store data
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
