@@ -93,20 +93,20 @@ def lambda_handler(event, context):
     }
 
 # test
-test_event = {
-    "Records": [
-        {
-            "s3": {
-                "bucket": {
-                    "name": "slackbot-rag-documents-20231119"
-                },
-                "object": {
-                    "key": "New_and_improved_embedding_model.pdf"
-                }
-            }
-        }
-    ]
-}
+# test_event = {
+#     "Records": [
+#         {
+#             "s3": {
+#                 "bucket": {
+#                     "name": "slackbot-rag-documents-20231119"
+#                 },
+#                 "object": {
+#                     "key": "New_and_improved_embedding_model.pdf"
+#                 }
+#             }
+#         }
+#     ]
+# }
 
-response = lambda_handler(test_event, None)
-print(response)
+# response = lambda_handler(test_event, None)
+# print(response)
