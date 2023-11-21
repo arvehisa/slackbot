@@ -1,0 +1,14 @@
+{
+    "Records": [
+        {
+            "s3": {
+                "bucket": {
+                    "name": "slackbot-rag-documents-20231119"
+                },
+                "object": {
+                    "key": "New_and_improved_embedding_model.pdf"
+                }
+            }
+        }
+    ]
+}

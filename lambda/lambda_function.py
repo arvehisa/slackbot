@@ -4,7 +4,6 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import BedrockEmbeddings
 from langchain.vectorstores.pgvector import PGVector
-from io import BytesIO
 import tempfile
 import logging
 import sys
@@ -26,18 +25,6 @@ s3_client = boto3.client('s3')
 # Embedding モデルの指定
 bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1", region_name="us-east-1")
 
-# DB 接続情報
-CONNECTION_STRING = PGVector.connection_string_from_db_params(
-    driver="psycopg2",
-    host=os.environ.get("PGVECTOR_HOST"),
-    port="5432",
-    database="postgres",
-    user="postgres",
-    password=os.environ.get("PGVECTOR_PASSWORD"),
-)
-
-# Collection Name は後ほど一般的な命名にする
-COLLECTION_NAME = "bedrock_documents"
 
 def lambda_handler(event, context):
     try:
@@ -72,6 +59,19 @@ def lambda_handler(event, context):
         # log how many docs were splitted into
         logger.info(f"Splitted into {len(docs)} documents")
 
+        # DB 接続情報
+        CONNECTION_STRING = PGVector.connection_string_from_db_params(
+            driver="psycopg2",
+            host=os.environ.get("PGVECTOR_HOST"),
+            port="5432",
+            database="postgres",
+            user="postgres",
+            password=os.environ.get("PGVECTOR_PASSWORD"),
+        )
+
+        # Collection Name は後ほど一般的な命名にする
+        COLLECTION_NAME = "bedrock_documents"
+
         # ベクトル化と保存にかかった時間を計測
         start_time = time.time()
 
@@ -96,22 +96,3 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': f'Error processing {file_key}'
         }
-
-# test
-# test_event = {
-#     "Records": [
-#         {
-#             "s3": {
-#                 "bucket": {
-#                     "name": "slackbot-rag-documents-20231119"
-#                 },
-#                 "object": {
-#                     "key": "New_and_improved_embedding_model.pdf"
-#                 }
-#             }
-#         }
-#     ]
-# }
-
-# response = lambda_handler(test_event, None)
-# print(response)

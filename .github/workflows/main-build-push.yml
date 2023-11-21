@@ -1,4 +1,4 @@
-name: Main App Build and Push to ECR
+name: Slackbot App Build and Push to ECR
 
 on:
   push:

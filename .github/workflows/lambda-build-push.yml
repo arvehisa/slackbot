@@ -1,4 +1,4 @@
-name: Lambda Build and Push to ECR
+name: Document Embedding Lambda Build and Push to ECR
 
 on:
   push:
