@@ -18,7 +18,7 @@ export class CoreStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, 'Vpc', {
       vpcName: "slackbot-vpc",
-      maxAzs: 1, //1AZ のにしたいのでこのあとは RDS Instance 使う
+      maxAzs: 2,
     });
 
     const AppSG = new ec2.SecurityGroup(
@@ -50,21 +50,24 @@ export class CoreStack extends cdk.Stack {
       { secretName: 'rag-pgvector-db-secrets' }
     )
     
-     new rds.DatabaseInstance(this, 'postgres', {
+    new rds.DatabaseCluster(this, 'postgres', {
       credentials: rdsCredentials,
-      databaseName: 'postgres',
-      instanceIdentifier: 'rag-pgvector-db',
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15_3,
-      }),
-      instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.T4G, 
-        ec2.InstanceSize.MEDIUM
-      ),
-      vpc: vpc,
-      securityGroups: [PostgresSG],
-      vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
-    });
+      defaultDatabaseName: 'postgres', //database name
+      clusterIdentifier: 'rag-pgvector-db',
+      engine: rds.DatabaseClusterEngine.auroraPostgres({
+          version: rds.AuroraPostgresEngineVersion.VER_15_3,
+        }),
+      instances: 1,
+      instanceProps: {
+          instanceType: ec2.InstanceType.of(
+              ec2.InstanceClass.T4G, 
+              ec2.InstanceSize.MEDIUM
+          ),
+          vpc: vpc,
+          securityGroups: [PostgresSG],
+          vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }), 
+      }
+    })
     
     const secrets = secretsmanager.Secret.fromSecretNameV2(
       this,

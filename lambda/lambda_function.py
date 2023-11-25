@@ -39,12 +39,12 @@ def lambda_handler(event, context):
         # S3からファイルを読み込む
         file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
         file_content = file_obj['Body'].read()
+        logger.info(f"Successfully read {file_key} from S3")
 
         # 一時ファイルにPDFを保存
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
             temp_file.write(file_content)
             temp_file_path = temp_file.name
-
         logger.info(f"Saved {file_key} into temp file path: {temp_file_path}")
 
         documents = PyPDFLoader(temp_file_path).load()

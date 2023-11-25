@@ -9,7 +9,7 @@ const app = new cdk.App();
 
 const ecrStack = new EcrStack(app, 'EcrStack'); 
 
-const coreStack = new CoreStack(app, 'NetworkStack'); 
+const coreStack = new CoreStack(app, 'CoreStack'); 
 
 new AppRunnerStack(app, 'AppRunnerStack', {
   ecr: ecrStack.ecr,
