@@ -9,7 +9,7 @@ import { Construct } from 'constructs';
 type Props = cdk.StackProps & {
   ecr: ecr.Repository;
   vpc: ec2.Vpc;
-  appRunnerVpcConnectorSG: ec2.SecurityGroup;
+  AppSG: ec2.SecurityGroup;
 };
 
 export class AppRunnerStack extends cdk.Stack {
@@ -18,7 +18,7 @@ export class AppRunnerStack extends cdk.Stack {
     
     const vpcConnector = new apprunner.VpcConnector(this, 'VpcConnector', {
       vpc: props.vpc,
-      securityGroups: [props.appRunnerVpcConnectorSG],
+      securityGroups: [props.AppSG],
       vpcSubnets: props.vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
       vpcConnectorName: 'apprunner-vpc-connector',
     });
@@ -40,6 +40,7 @@ export class AppRunnerStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')
     )
 
+    // lambda も使ってるのでここ重複している？
     const secrets = secretsmanager.Secret.fromSecretNameV2(
       this,
       'rag-pgvector-db-secrets', //CDK用の名前
