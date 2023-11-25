@@ -8,6 +8,7 @@ import tempfile
 import logging
 import sys
 import time
+import psycopg2
 
 # Logging
 logger = logging.getLogger()
@@ -68,6 +69,21 @@ def lambda_handler(event, context):
             user="postgres",
             password=os.environ.get("PGVECTOR_PASSWORD"),
         )
+
+        # DB に pgvector が入ってない場合インストール
+        conn = psycopg2.connect(CONNECTION_STRING)
+        cur = conn.cursor()
+
+        cur.execute("SELECT * FROM pg_extension WHERE extname = 'vector';")
+        extension_exists = cur.fetchone()
+
+        if not extension_exists:
+            cur.execute("CREATE EXTENSION vector;")
+            conn.commit()
+            logger.info("Created vector extension")
+
+        cur.close()
+        conn.close()
 
         # Collection Name は後ほど一般的な命名にする
         COLLECTION_NAME = "bedrock_documents"
