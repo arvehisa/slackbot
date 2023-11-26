@@ -61,14 +61,15 @@ def lambda_handler(event, context):
         logger.info(f"Splitted into {len(docs)} documents")
 
         # DB 接続情報
-        CONNECTION_STRING = PGVector.connection_string_from_db_params(
-            driver="psycopg2",
-            host=os.environ.get("PGVECTOR_HOST"),
-            port="5432",
-            database="postgres",
-            user="postgres",
-            password=os.environ.get("PGVECTOR_PASSWORD"),
-        )
+        driver = "psycopg2"
+        host = os.environ.get("PGVECTOR_HOST")
+        port = "5432"
+        database = "postgres"
+        user = "postgres"
+        password = os.environ.get("PGVECTOR_PASSWORD")
+
+        # Langchain 側はなぜか f"postgresql+{driver}://{user}:{password}@{host}:{port}/{database}" になっているのであえて別で作る
+        CONNECTION_STRING = f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
         # DB に pgvector が入ってない場合インストール
         conn = psycopg2.connect(CONNECTION_STRING)
@@ -85,6 +86,16 @@ def lambda_handler(event, context):
         cur.close()
         conn.close()
 
+        # DB 接続情報
+        CONNECTION_STRING_EMBEDDING = PGVector.connection_string_from_db_params(
+            driver=driver,
+            host=host,
+            port=port,
+            database=database,
+            user=user,
+            password=password,
+        )
+
         # Collection Name は後ほど一般的な命名にする
         COLLECTION_NAME = "bedrock_documents"
 
@@ -96,7 +107,7 @@ def lambda_handler(event, context):
             embedding=bedrock_embeddings,
             documents=docs,
             collection_name=COLLECTION_NAME,
-            connection_string=CONNECTION_STRING
+            connection_string=CONNECTION_STRING_EMBEDDING
         )
 
         elapsed_time = time.time() - start_time
