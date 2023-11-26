@@ -104,7 +104,7 @@ export class CoreStack extends cdk.Stack {
       },
       timeout: cdk.Duration.seconds(300),
       memorySize: 2048,
-      architecture: lambda.Architecture.ARM_64,
+      architecture: lambda.Architecture.ARM_64, // CDK デプロイするときにローカルでビルドしているので、ローカルの環境に合わせて ARM にする
       role: lambdaRole,
     });
 
