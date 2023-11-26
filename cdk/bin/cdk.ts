@@ -14,5 +14,5 @@ const coreStack = new CoreStack(app, 'CoreStack');
 new AppRunnerStack(app, 'AppRunnerStack', {
   ecr: ecrStack.ecr,
   vpc: coreStack.myVpc, 
-  AppSG: coreStack.AppSG,
+  AppRunnerLambdaSG: coreStack.AppRunnerLambdaSG,
 });

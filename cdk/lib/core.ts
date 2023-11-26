@@ -10,7 +10,7 @@ import { Construct } from 'constructs';
 
 export class CoreStack extends cdk.Stack {
   readonly myVpc: ec2.Vpc;
-  readonly AppSG: ec2.SecurityGroup;
+  readonly AppRunnerLambdaSG: ec2.SecurityGroup;
   readonly rdssg: ec2.SecurityGroup;
 
   constructor(scope: Construct, id: string) {
@@ -21,9 +21,9 @@ export class CoreStack extends cdk.Stack {
       maxAzs: 2,
     });
 
-    const AppSG = new ec2.SecurityGroup(
+    const AppRunnerLambdaSG = new ec2.SecurityGroup(
       this,
-        'AppSG', {
+        'AppRunnerLambdaSG', {
           securityGroupName: 'apprunner-lambda-sg',
           vpc,
          }
@@ -40,7 +40,7 @@ export class CoreStack extends cdk.Stack {
     )
 
     PostgresSG.addIngressRule(
-      AppSG,
+      AppRunnerLambdaSG,
       ec2.Port.tcp(5432),
       'Allow AppRunner VPC Connector to access Postgres'
     )
@@ -76,6 +76,7 @@ export class CoreStack extends cdk.Stack {
     )
 
     const lambdaRole = new iam.Role(this, 'LambdaExecutionRole', {
+      roleName: 'embedding-lambda-role',
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       description: 'Embedding Lambda Execution Role',
     })
@@ -92,16 +93,18 @@ export class CoreStack extends cdk.Stack {
     });
 
     const embeddinglambda = new lambda.DockerImageFunction(this, 'embeddinglambda', {
+      functionName: 'embedding-lambda',
       code: lambda.DockerImageCode.fromImageAsset('../lambda'),
       vpc: vpc,
       vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
-      securityGroups: [AppSG],
+      securityGroups: [AppRunnerLambdaSG],
       environment: {
         PGVECTOR_HOST: secrets.secretValueFromJson('host').unsafeUnwrap(),
         PGVECTOR_PASSWORD: secrets.secretValueFromJson('password').unsafeUnwrap(),
       },
       timeout: cdk.Duration.seconds(300),
       memorySize: 2048,
+      architecture: lambda.Architecture.ARM_64,
       role: lambdaRole,
     });
 
@@ -110,7 +113,7 @@ export class CoreStack extends cdk.Stack {
     );
 
     this.myVpc = vpc
-    this.AppSG = AppSG
+    this.AppRunnerLambdaSG = AppRunnerLambdaSG
     this.rdssg = PostgresSG;
   }
 }
