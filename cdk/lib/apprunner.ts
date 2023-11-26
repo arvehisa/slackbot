@@ -10,7 +10,7 @@ type Props = cdk.StackProps & {
   ecr: ecr.Repository;
   vpc: ec2.Vpc;
   AppRunnerLambdaSG: ec2.SecurityGroup;
-  secrets: secretsmanager.Secret;
+  secrets: secretsmanager.ISecret;
 };
 
 export class AppRunnerStack extends cdk.Stack {

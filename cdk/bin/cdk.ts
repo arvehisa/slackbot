@@ -15,5 +15,5 @@ new AppRunnerStack(app, 'AppRunnerStack', {
   ecr: ecrStack.ecr,
   vpc: coreStack.myVpc, 
   AppRunnerLambdaSG: coreStack.AppRunnerLambdaSG,
-  secrets: coreStack.secrets,
+  secrets: coreStack.rdsSecrets,
 });

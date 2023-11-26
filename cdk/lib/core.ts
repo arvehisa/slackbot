@@ -12,6 +12,7 @@ export class CoreStack extends cdk.Stack {
   readonly myVpc: ec2.Vpc;
   readonly AppRunnerLambdaSG: ec2.SecurityGroup;
   readonly rdssg: ec2.SecurityGroup;
+  readonly rdsSecrets: secretsmanager.ISecret;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -114,6 +115,6 @@ export class CoreStack extends cdk.Stack {
 
     this.myVpc = vpc
     this.AppRunnerLambdaSG = AppRunnerLambdaSG
-    this.rdssg = PostgresSG;
+    this.rdsSecrets = secrets;
   }
 }
