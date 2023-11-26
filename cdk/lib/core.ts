@@ -6,6 +6,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { Construct } from 'constructs';
 
 export class CoreStack extends cdk.Stack {
@@ -94,8 +95,9 @@ export class CoreStack extends cdk.Stack {
     });
 
     const embeddinglambda = new lambda.DockerImageFunction(this, 'embeddinglambda', {
+      
       functionName: 'embedding-lambda',
-      code: lambda.DockerImageCode.fromImageAsset('../lambda'),
+      code: lambda.DockerImageCode.fromImageAsset('../lambda',{ platform: Platform.LINUX_AMD64 }),
       vpc: vpc,
       vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
       securityGroups: [AppRunnerLambdaSG],
@@ -105,7 +107,7 @@ export class CoreStack extends cdk.Stack {
       },
       timeout: cdk.Duration.seconds(300),
       memorySize: 2048,
-      architecture: lambda.Architecture.ARM_64, // CDK デプロイするときにローカルでビルドしているので、ローカルの環境に合わせて ARM にする
+      architecture: lambda.Architecture.X86_64,
       role: lambdaRole,
     });
 

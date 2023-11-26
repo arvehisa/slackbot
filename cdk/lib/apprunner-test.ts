@@ -9,7 +9,8 @@ import { Construct } from 'constructs';
 type Props = cdk.StackProps & {
   ecr: ecr.Repository;
   vpc: ec2.Vpc;
-  appRunnerVpcConnectorSG: ec2.SecurityGroup;
+  AppRunnerLambdaSG: ec2.SecurityGroup;
+  secrets: secretsmanager.ISecret;
 };
 
 export class AppRunnerStack extends cdk.Stack {
@@ -18,7 +19,7 @@ export class AppRunnerStack extends cdk.Stack {
     
     const vpcConnector = new apprunner.VpcConnector(this, 'VpcConnector', {
       vpc: props.vpc,
-      securityGroups: [props.appRunnerVpcConnectorSG],
+      securityGroups: [props.AppRunnerLambdaSG],
       vpcSubnets: props.vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
       vpcConnectorName: 'apprunner-vpc-connector',
     });
@@ -40,40 +41,29 @@ export class AppRunnerStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')
     )
 
-    const secrets = secretsmanager.Secret.fromSecretNameV2(
-      this,
-      'rag-pgvector-db-secrets', //CDK用の名前
-      'rag-pgvector-db-secrets' //実際のSecretsの名前
-    )
-
     //手動で Slackbot の Secret を Secrets Manager にいれたものをここで取得する
-    const slackSecret = secretsmanager.Secret.fromSecretAttributes( 
+    const slackSecret = secretsmanager.Secret.fromSecretNameV2( 
       this,
-      'SlackSecret',
-      {
-        secretCompleteArn: 'arn:aws:secretsmanager:us-east-1:618044871166:secret:slackbot-credentials-DdeZ1X',
-      }
+      'SlackSecret', //CloudFormation Logical ID
+      'slackbot-credentials' //実際のSecretsの名前を指定しているのでそのクレデンシャルがあることが前提
     );
 
-
     new apprunner.Service(this, 'AppRunnerService', {
-      serviceName: 'slackbot-rag-pgvector',
-      source: apprunner.Source.fromEcrPublic({
-        imageConfiguration: {
-          port: 8080,
+      serviceName: 'pgadmin-service',
+      source: apprunner.Source.fromEcr ({
+        imageConfiguration: { 
+          port: 80,
           environment: {
-            // unsafeUnwrap() は、SecretValue から値を取り出すメソッド。Secret は Cloudformation に出力されるらしいのでセキュリティリスクあり
-            DATABASE_HOST: secrets.secretValueFromJson('host').unsafeUnwrap(),
-            SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').unsafeUnwrap(),
-            SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').unsafeUnwrap(),
+            'PGADMIN_DEFAULT_EMAIL': 'arvehisa@gmail.com',
+            'PGADMIN_DEFAULT_PASSWORD': 'Arvehisa0707'
           }
         },
-        imageIdentifier: 'public.ecr.aws/bitnami/phppgadmin:latest',
+        repository: ecr.Repository.fromRepositoryName(this, 'PgAdminRepo', 'pgadmin4'),
+        tag: 'latest',
       }),
       vpcConnector,
       instanceRole: instanceRole,
       accessRole: accessRole,
     });
-
   }
 }

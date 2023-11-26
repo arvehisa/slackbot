@@ -48,7 +48,27 @@ export class AppRunnerStack extends cdk.Stack {
       'slackbot-credentials' //実際のSecretsの名前を指定しているのでそのクレデンシャルがあることが前提
     );
 
-    new apprunner.Service(this, 'AppRunnerService', {
+
+    //pgadmin を別の AppRunner でデプロイする
+    new apprunner.Service(this, 'pgadmin-app-runner', {
+      serviceName: 'pgadmin-service',
+      source: apprunner.Source.fromEcr ({
+        imageConfiguration: { 
+          port: 80,
+          environment: {
+            'PGADMIN_DEFAULT_EMAIL': 'postgres@example.com',
+            'PGADMIN_DEFAULT_PASSWORD': 'postgres'
+          }
+        },
+        repository: ecr.Repository.fromRepositoryName(this, 'PgAdminRepo', 'pgadmin4'),
+        tag: 'latest',
+      }),
+      vpcConnector,
+      instanceRole: instanceRole,
+      accessRole: accessRole,
+    });
+
+    new apprunner.Service(this, 'slackbot-app-runner', {
       serviceName: 'slackbot-rag-pgvector',
       source: apprunner.Source.fromEcr({
         imageConfiguration: { 
@@ -59,6 +79,7 @@ export class AppRunnerStack extends cdk.Stack {
             PGVECTOR_PASSWORD: props.secrets.secretValueFromJson('password').unsafeUnwrap(),
             SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').unsafeUnwrap(),
             SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').unsafeUnwrap(),
+            SOCKET_MODE_TOKEN: slackSecret.secretValueFromJson('SOCKET_MODE_TOKEN').unsafeUnwrap(),
           }
         },
         repository: props.ecr,
@@ -67,6 +88,11 @@ export class AppRunnerStack extends cdk.Stack {
       vpcConnector,
       instanceRole: instanceRole,
       accessRole: accessRole,
+
     });
+
+
+
+
   }
 }
