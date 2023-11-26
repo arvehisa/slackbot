@@ -45,7 +45,7 @@ export class AppRunnerStack extends cdk.Stack {
     const slackSecret = secretsmanager.Secret.fromSecretNameV2( 
       this,
       'SlackSecret', //CloudFormation Logical ID
-      'SlackSecret' //実際のSecretsの名前
+      'slackbot-credentials' //実際のSecretsの名前を指定しているのでそのクレデンシャルがあることが前提
     );
 
     new apprunner.Service(this, 'AppRunnerService', {
