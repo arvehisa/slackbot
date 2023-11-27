@@ -7,9 +7,9 @@
 
 ## 事前準備
 - Slackbot を設定して下記を取得する
-SLACK_BOT_TOKEN
-SLACK_SIGNING_SECRET
-SOCKET_MODE_TOKEN
+    - `SLACK_BOT_TOKEN`
+    - `SLACK_SIGNING_SECRET`
+    - `SOCKET_MODE_TOKEN`
 - Secret Manager に `slackbot-credentials` という名前で手動で上記の Slack token を入れる
 
 
