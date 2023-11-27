@@ -55,13 +55,13 @@ export class AppRunnerStack extends cdk.Stack {
       source: apprunner.Source.fromEcr ({
         imageConfiguration: { 
           port: 80,
-          environment: {
+          environmentVariables: {
             'PGADMIN_DEFAULT_EMAIL': 'postgres@example.com',
             'PGADMIN_DEFAULT_PASSWORD': 'postgres'
           }
         },
         repository: ecr.Repository.fromRepositoryName(this, 'PgAdminRepo', 'pgadmin4'),
-        tag: 'latest',
+        tagOrDigest: 'latest',
       }),
       vpcConnector,
       instanceRole: instanceRole,
@@ -73,7 +73,7 @@ export class AppRunnerStack extends cdk.Stack {
       source: apprunner.Source.fromEcr({
         imageConfiguration: { 
           port: 8080,
-          environment: {
+          environmentVariables: {
             // unsafeUnwrap() は、SecretValue から値を取り出すメソッド。Secret は Cloudformation に出力されるらしいのでセキュリティリスクあり
             PGVECTOR_HOST: props.secrets.secretValueFromJson('host').unsafeUnwrap(),
             PGVECTOR_PASSWORD: props.secrets.secretValueFromJson('password').unsafeUnwrap(),
@@ -83,7 +83,7 @@ export class AppRunnerStack extends cdk.Stack {
           }
         },
         repository: props.ecr,
-        tag: 'latest',
+        tagOrDigest: 'latest',
       }),
       vpcConnector,
       instanceRole: instanceRole,
