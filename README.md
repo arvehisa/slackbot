@@ -15,14 +15,14 @@ SOCKET_MODE_TOKEN
 
 ## CDK
 - cdk deploy EcrStack
-    App Runner 用の ECR を作成する
+    - App Runner 用の ECR を作成する
 
 - App Runner 用のイメージを作られた ECR レポジトリにプッシュ
-    このレポジトリでは Github Actions で 自動ビルドとプッシュを設定している
+    - このレポジトリでは Github Actions で 自動ビルドとプッシュを設定している
 
 - cdk deploy CoreStack
-    Network, RDS, S3, Lambda をデプロイ
+    - Network, RDS, S3, Lambda をデプロイ
 
 - cdk deploy AppRunnerStack --no-rollback
-    Slack App 用の App Runner と RDS 接続可能な pgadmin4 をデプロイ
-    なぜか Slack App 用の App Runner は CDK でデプロイすると一回失敗するので、no-rollback 設定でコンソール上で Rebuild すると成功する
+    - Slack App 用の App Runner と RDS 接続可能な pgadmin4 をデプロイ
+    - (なぜか Slack App 用の App Runner は CDK でデプロイすると一回失敗するので、no-rollback 設定でコンソール上で Rebuild すると成功する)
