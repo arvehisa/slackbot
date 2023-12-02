@@ -48,6 +48,12 @@ export class AppRunnerStack extends cdk.Stack {
       'slackbot-credentials' //実際のSecretsの名前を指定しているのでそのクレデンシャルがあることが前提
     );
 
+    const langchainApiKey = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      'LangchainApiKey',
+      'langchain'
+    );
+
 
     //pgadmin を別の AppRunner でデプロイする
     new apprunner.Service(this, 'pgadmin-app-runner', {
@@ -80,6 +86,10 @@ export class AppRunnerStack extends cdk.Stack {
             SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').unsafeUnwrap(),
             SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').unsafeUnwrap(),
             SOCKET_MODE_TOKEN: slackSecret.secretValueFromJson('SOCKET_MODE_TOKEN').unsafeUnwrap(),
+            LANGCHAIN_TRACING_V2: "true",
+            LANGCHAIN_ENDPOINT: "https://api.smith.langchain.com",
+            LANGCHAIN_API_KEY: langchainApiKey.secretValueFromJson('LANGCHAIN_API_KEY').unsafeUnwrap(),
+            LANGCHAIN_PROJECT: "slackbot-rag-pgvector"
           }
         },
         repository: props.ecr,
