@@ -8,6 +8,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { Construct } from 'constructs';
+import * as api from 'aws-cdk-lib/aws-apigateway';
 
 export class CoreStack extends cdk.Stack {
   readonly myVpc: ec2.Vpc;
@@ -21,6 +22,7 @@ export class CoreStack extends cdk.Stack {
     const vpc = new ec2.Vpc(this, 'Vpc', {
       vpcName: "slackbot-vpc",
       maxAzs: 2,
+      natGateways: 1,
     });
 
     const AppRunnerLambdaSG = new ec2.SecurityGroup(
@@ -71,11 +73,24 @@ export class CoreStack extends cdk.Stack {
       }
     })
     
+    // secrets for lambda environment variables
     const secrets = secretsmanager.Secret.fromSecretNameV2(
       this,
       'rag-pgvector-db-secrets', //CDK用の名前
       'rag-pgvector-db-secrets' //実際のSecretsの名前
     )
+
+    const slackSecret = secretsmanager.Secret.fromSecretNameV2( 
+      this,
+      'SlackSecret', //CloudFormation Logical ID
+      'slackbot-credentials' //実際のSecretsの名前を指定しているのでそのクレデンシャルがあることが前提
+    );
+
+    const langchainApiKey = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      'LangchainApiKey',
+      'langchain'
+    );
 
     const lambdaRole = new iam.Role(this, 'LambdaExecutionRole', {
       roleName: 'embedding-lambda-role',
@@ -97,7 +112,7 @@ export class CoreStack extends cdk.Stack {
     const embeddinglambda = new lambda.DockerImageFunction(this, 'embeddinglambda', {
       
       functionName: 'embedding-lambda',
-      code: lambda.DockerImageCode.fromImageAsset('../lambda',{ platform: Platform.LINUX_AMD64 }),
+      code: lambda.DockerImageCode.fromImageAsset('../embedding-lambda',{ platform: Platform.LINUX_AMD64 }),
       vpc: vpc,
       vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
       securityGroups: [AppRunnerLambdaSG],
@@ -114,6 +129,53 @@ export class CoreStack extends cdk.Stack {
     bucket.addEventNotification(
       s3.EventType.OBJECT_CREATED_PUT, new s3n.LambdaDestination(embeddinglambda)
     );
+
+    // Slackbot Lambda 
+    
+    const slackbotLambda = new lambda.DockerImageFunction(this, 'slackbotLambda', {
+      functionName: 'slackbot-lambda',
+      code: lambda.DockerImageCode.fromImageAsset('../app',{ platform: Platform.LINUX_AMD64 }),
+      vpc: vpc, 
+      vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
+      securityGroups: [AppRunnerLambdaSG],
+      environment: {
+        PGVECTOR_HOST: secrets.secretValueFromJson('host').unsafeUnwrap(),
+        PGVECTOR_PASSWORD: secrets.secretValueFromJson('password').unsafeUnwrap(),
+        SLACK_BOT_TOKEN: slackSecret.secretValueFromJson('SLACK_BOT_TOKEN').unsafeUnwrap(),
+        SLACK_SIGNING_SECRET: slackSecret.secretValueFromJson('SLACK_SIGNING_SECRET').unsafeUnwrap(),
+        SOCKET_MODE_TOKEN: slackSecret.secretValueFromJson('SOCKET_MODE_TOKEN').unsafeUnwrap(),
+        LANGCHAIN_TRACING_V2: "true",
+        LANGCHAIN_ENDPOINT: "https://api.smith.langchain.com",
+        LANGCHAIN_API_KEY: langchainApiKey.secretValueFromJson('LANGCHAIN_API_KEY').unsafeUnwrap(),
+        LANGCHAIN_PROJECT: "slackbot-rag-pgvector"
+      },
+      timeout: cdk.Duration.seconds(300),
+      memorySize: 2048,
+      architecture: lambda.Architecture.X86_64,
+      role: lambdaRole,
+      });
+
+
+    // API Gateway
+    new api.LambdaRestApi(this, 'slackbot-api', {
+      handler: slackbotLambda,
+    });
+
+    // // Client VPN 作ったけど、VPN 自体には接続可能だが RDS には接続できない模様。トラシューがおわってない
+    // const clientCidr = '1.0.0.0/22'
+    // // ACM は東京リージョンの証明書でも試してみたが無理だった。いまはバージニアのに変更した
+    // const certificateARN = 'arn:aws:acm:us-east-1:618044871166:certificate/7e043a23-ab56-4ddf-b913-35aaa4066176'
+
+    // new ec2.ClientVpnEndpoint(this, 'ClientVpn', {
+    //   vpc: vpc,
+    //   cidr: clientCidr,
+    //   serverCertificateArn: certificateARN,
+    //   clientCertificateArn: certificateARN,
+    //   vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
+    //   securityGroups: [AppRunnerLambdaSG],
+    //   description: 'Client VPN Endpoint',
+    // })
+    
 
     this.myVpc = vpc
     this.AppRunnerLambdaSG = AppRunnerLambdaSG
