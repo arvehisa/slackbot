@@ -4,8 +4,6 @@ import re
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
-from slack_sdk import WebClient
-
 
 from langchain.chat_models import BedrockChat
 from langchain.embeddings import BedrockEmbeddings
@@ -73,17 +71,22 @@ app = App(
         token=SLACK_BOT_TOKEN,
         process_before_response=True)
 
-def immediately_add_stamp(ack, client, event):
+receiver = SlackRequestHandler(app)
+
+@app.event("app_mention")
+def mention(event, say, ack):
+    # slack にすぐ応答を返す
     ack()
-    client.reactions_add(
-        channel=event['channel'],
-        timestamp = event['ts'],
-        name = "thinking_face",
-    )
-        
-def mention(event, say):
+
     # 非同期処理
     no_mention_text = re.sub(r'^<.*>', '', event['text'])
+    chat_history = []
+    """
+    inputs = {
+        "chat_history": chat_history,
+        "question": no_mention_text,
+    }
+    """
     thread_ts = event['ts']
     result = qa({"query":no_mention_text})
     answer = result["result"]
@@ -92,11 +95,13 @@ def mention(event, say):
     
     say(text=response, thread_ts=thread_ts)
 
-app.event("app_mention")(
-    ack=immediately_add_stamp, 
-    lazy=[mention]
-    )
-
 def lambda_handler(event, context):
-    receiver = SlackRequestHandler(app=app)
+    # X-Slack-Retry-Num Header がある場合無視する実装
+    headers = event.get("headers", {})
+
+    if "X-Slack-Retry-Num" in headers:
+        return {
+            "statusCode": 200,
+            "body": "Event ignored due to retry header"
+        }
     return receiver.handle(event, context)

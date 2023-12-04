@@ -161,20 +161,20 @@ export class CoreStack extends cdk.Stack {
       handler: slackbotLambda,
     });
 
-    // // Client VPN 作ったけど、VPN 自体には接続可能だが RDS には接続できない模様。トラシューがおわってない
-    // const clientCidr = '1.0.0.0/22'
-    // // ACM は東京リージョンの証明書でも試してみたが無理だった。いまはバージニアのに変更した
-    // const certificateARN = 'arn:aws:acm:us-east-1:618044871166:certificate/7e043a23-ab56-4ddf-b913-35aaa4066176'
+    // Client VPN Endpoint
+    const clientCidr = '1.0.0.0/22'
+    const serverCertificateArn = 'arn:aws:acm:us-east-1:618044871166:certificate/e6754345-c2c4-44f8-b4b1-43e28d6a7b03'
+    const clientCertificateArn = 'arn:aws:acm:us-east-1:618044871166:certificate/987d5ae8-2686-4b7a-be67-4b85ae468c99'
 
-    // new ec2.ClientVpnEndpoint(this, 'ClientVpn', {
-    //   vpc: vpc,
-    //   cidr: clientCidr,
-    //   serverCertificateArn: certificateARN,
-    //   clientCertificateArn: certificateARN,
-    //   vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
-    //   securityGroups: [AppRunnerLambdaSG],
-    //   description: 'Client VPN Endpoint',
-    // })
+    new ec2.ClientVpnEndpoint(this, 'ClientVpn', {
+      vpc: vpc,
+      cidr: clientCidr,
+      serverCertificateArn: serverCertificateArn,
+      clientCertificateArn: clientCertificateArn,
+      vpcSubnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }),
+      securityGroups: [AppRunnerLambdaSG],
+      description: 'Client VPN Endpoint',
+    })
     
 
     this.myVpc = vpc
