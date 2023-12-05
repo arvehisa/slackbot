@@ -161,6 +161,9 @@ export class CoreStack extends cdk.Stack {
     // API Gateway
     new api.LambdaRestApi(this, 'slackbot-api', {
       handler: slackbotLambda,
+      deployOptions: {
+        tracingEnabled: true,
+      },
     });
 
     // Client VPN Endpoint

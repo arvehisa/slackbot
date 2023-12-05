@@ -2,27 +2,21 @@ import os
 import re
 
 from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
 
-
 from langchain.chat_models import BedrockChat
 from langchain.embeddings import BedrockEmbeddings
-from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.pgvector import PGVector
-import logging
+from aws_lambda_powertools import Tracer
 import sys
 
-# Logging
-logging.basicConfig(level=logging.DEBUG)
-
+# model setting
 region="us-east-1"
 model_id ="anthropic.claude-v2" #anthropic.claude-v2
 llm = BedrockChat(model_id=model_id, region_name=region)  
-# llm = ChatOpenAI(model_name=model_id) #gpt-4
 embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1", region_name=region)
 
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
@@ -73,16 +67,22 @@ app = App(
         token=SLACK_BOT_TOKEN,
         process_before_response=True)
 
-def immediately_add_stamp(ack, client, event):
+# lambda powertool tracer
+tracer = Tracer()
+
+# Slack 3秒タイムアウト回避のための処理
+@tracer.capture_method
+def just_ack(ack):
     ack()
+
+# 非同期処理
+@tracer.capture_method
+def mention(event, client, say):
     client.reactions_add(
         channel=event['channel'],
         timestamp = event['ts'],
         name = "thinking_face",
     )
-        
-def mention(event, say):
-    # 非同期処理
     no_mention_text = re.sub(r'^<.*>', '', event['text'])
     thread_ts = event['ts']
     result = qa({"query":no_mention_text})
@@ -93,10 +93,11 @@ def mention(event, say):
     say(text=response, thread_ts=thread_ts)
 
 app.event("app_mention")(
-    ack=immediately_add_stamp, 
+    ack=just_ack, 
     lazy=[mention]
     )
 
+@tracer.capture_lambda_handler
 def lambda_handler(event, context):
     receiver = SlackRequestHandler(app=app)
     return receiver.handle(event, context)

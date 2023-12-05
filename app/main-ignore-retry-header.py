@@ -96,12 +96,12 @@ def mention(event, say, ack):
     say(text=response, thread_ts=thread_ts)
 
 def lambda_handler(event, context):
-    # X-Slack-Retry-Num Header がある場合無視する実装
-    headers = event.get("headers", {})
+    # # X-Slack-Retry-Num Header がある場合無視する実装
+    # headers = event.get("headers", {})
 
-    if "X-Slack-Retry-Num" in headers:
-        return {
-            "statusCode": 200,
-            "body": "Event ignored due to retry header"
-        }
+    # if "X-Slack-Retry-Num" in headers:
+    #     return {
+    #         "statusCode": 200,
+    #         "body": "Event ignored due to retry header"
+    #     }
     return receiver.handle(event, context)
