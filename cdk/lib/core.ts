@@ -124,6 +124,7 @@ export class CoreStack extends cdk.Stack {
       memorySize: 2048,
       architecture: lambda.Architecture.X86_64,
       role: lambdaRole,
+      tracing: lambda.Tracing.ACTIVE,
     });
 
     bucket.addEventNotification(
@@ -153,6 +154,7 @@ export class CoreStack extends cdk.Stack {
       memorySize: 2048,
       architecture: lambda.Architecture.X86_64,
       role: lambdaRole,
+      tracing: lambda.Tracing.ACTIVE,
       });
 
 
